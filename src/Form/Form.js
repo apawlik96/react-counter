@@ -8,33 +8,23 @@ import FormLabel from '@mui/material/FormLabel';
 import RadioGroup from '@mui/material/RadioGroup';
 import Radio from '@mui/material/Radio';
 import Button from '@mui/material/Button';
+import { useFormContext } from 'react-hook-form';
 
-export const Form = ({ 
-    adultCount, setAdultCount, 
-    childrenCount, setChildrenCount, 
-    animalsCount, setAnimalsCount, 
-    inputValueLocation, setInputValueLocation, 
-    inputCheckboxChildrenOrAnimals, setInputCheckboxChildrenOrAnimals, 
-    inputCheckboxTermAndConditions, setInputCheckboxTermAndConditions, 
-    inputRadioYesOrNoTravelingForWork, setInputRadioYesOrNoTravelingForWork,
-    onBookNowClick 
-  }) => {
+export const Form = ({onBookNowClick}) => {
 
-    const handleInputValueLocation = (event) => {
-        setInputValueLocation(event.target.value)
-    }
-
-    const handleInputCheckboxChildrenOrAnimals = (event) => {
-        setInputCheckboxChildrenOrAnimals(event.target.checked)
-    }
-
-    const handleInputCheckboxTermAndConditions = (event) => {
-        setInputCheckboxTermAndConditions(event.target.checked)
-    }
-
-    const onOptionChange = event => {
-        setInputRadioYesOrNoTravelingForWork(event.target.value)
-    }
+    const {
+        register,
+        watch,
+        setValue,
+      } = useFormContext();
+    
+      const inputValueLocation = watch('inputValueLocation');
+      const inputCheckboxChildrenOrAnimals = watch('inputCheckboxChildrenOrAnimals');
+      const inputCheckboxTermAndConditions = watch('inputCheckboxTermAndConditions');
+      const inputRadioYesOrNoTravelingForWork = watch('inputRadioYesOrNoTravelingForWork');
+      const adultCount = watch('adultCount');
+      const childrenCount = watch('childrenCount');
+      const animalsCount = watch('animalsCount');
 
     return (
         <div className={formStyles.divForms}>
@@ -45,7 +35,7 @@ export const Form = ({
             </div>
 
             <Counter 
-                onChange={setAdultCount} 
+                setValue={(value) => setValue('adultCount', value)}
                 value={adultCount} 
                 maxValue={8} 
                 tag="adult"
@@ -54,9 +44,8 @@ export const Form = ({
             <div>
                 <FormControlLabel 
                     control={<Checkbox 
+                        {...register('inputCheckboxChildrenOrAnimals')}
                         sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
-                        checked={inputCheckboxChildrenOrAnimals} 
-                        onChange={handleInputCheckboxChildrenOrAnimals}
                     />} 
                     label="Are you travelling with children or animals?" 
                     sx={{
@@ -68,14 +57,16 @@ export const Form = ({
 
                 { inputCheckboxChildrenOrAnimals && <> 
                     <Counter 
-                        onChange={setChildrenCount} 
+                        {...register('childrenCount')}
+                        setValue={(value) => setValue('childrenCount', value)}
                         value={childrenCount} 
                         maxValue={4} 
                         tag="children"
                     />
 
                     <Counter 
-                        onChange={setAnimalsCount} 
+                        {...register('animalsCount')}
+                        setValue={(value) => setValue('animalsCount', value)}
                         value={animalsCount}
                         maxValue={2} 
                         tag="animals"
@@ -85,8 +76,8 @@ export const Form = ({
 
             <div>
                 <TextField 
+                    {...register('inputValueLocation')}
                     value={inputValueLocation}
-                    onChange={handleInputValueLocation} 
                     id="outlined-basic" 
                     label="Where are you going today?" 
                     variant="outlined"
@@ -126,6 +117,7 @@ export const Form = ({
                         row
                         aria-labelledby="demo-row-radio-buttons-group-label"
                         name="row-radio-buttons-group"
+                        {...register('inputRadioYesOrNoTravelingForWork')}
                         sx={{
                             justifyContent: 'center', 
                         }}>
@@ -133,8 +125,6 @@ export const Form = ({
                             value="yes" 
                             control={<Radio 
                                 value="yes" 
-                                checked={inputRadioYesOrNoTravelingForWork === "yes"} 
-                                onChange={onOptionChange}
                                 sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                             />} 
                             label="Yes" />
@@ -142,8 +132,6 @@ export const Form = ({
                             value="no" 
                             control={<Radio 
                                 value="no" 
-                                checked={inputRadioYesOrNoTravelingForWork === "no"} 
-                                onChange={onOptionChange}
                                 sx={{'& .MuiSvgIcon-root': { fontSize: 20 } }}
                             />} 
                             label="No" />
@@ -156,9 +144,9 @@ export const Form = ({
 
                 <FormControlLabel 
                     control={<Checkbox 
+                        {...register('inputCheckboxTermAndConditions')}
                         sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                         checked={inputCheckboxTermAndConditions} 
-                        onChange={handleInputCheckboxTermAndConditions}
                     />} 
                     label="Do you accept terms and conditions?" 
                     sx={{

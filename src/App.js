@@ -1,25 +1,41 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./App.css";
 import { Form } from "./Form/Form";
 import { Results } from "./Results/Results";
+import { useForm, FormProvider } from "react-hook-form";
 
 function App() {
-  const [adultCount, setAdultCount] = useState(0);
-  const [childrenCount, setChildrenCount] = useState(0);
-  const [animalsCount, setAnimalsCount] = useState(0);
-  const [inputValueLocation, setInputValueLocation] = useState();
-  const [inputCheckboxChildrenOrAnimals, setInputCheckboxChildrenOrAnimals] = useState(false);
-  const [inputCheckboxTermAndConditions, setInputCheckboxTermAndConditions] = useState(false);
-  const [inputRadioYesOrNoTravelingForWork, setInputRadioYesOrNoTravelingForWork] = useState(false);
-  const [changeViewFormOrResults, setChangeViewFormOrResults] = useState(false);
+  const methods = useForm({
+    defaultValues: {
+      adultCount: 0,
+      childrenCount: 0,
+      animalsCount: 0,
+      inputValueLocation: '',
+      travelingWithChildrenOrAnimals: false,
+      inputCheckboxTermAndConditions: false,
+      inputRadioYesOrNoTravelingForWork: false,
+      changeViewFormOrResults: false,
+    },
+  });
+
+  const { watch, setValue } = methods;
+
+  const {
+    adultCount,
+    childrenCount,
+    animalsCount,
+    inputValueLocation,
+    inputRadioYesOrNoTravelingForWork,
+    changeViewFormOrResults,
+  } = watch();
 
   const handleBookNowClick  = () => {
-    setChangeViewFormOrResults(true);
+    setValue('changeViewFormOrResults', true);
   };
 
   const handleBackClick  = () => {
-    setInputCheckboxTermAndConditions(false);
-    setChangeViewFormOrResults(false);
+    setValue('inputCheckboxTermAndConditions', false);
+    setValue('changeViewFormOrResults', false);
   };
 
   useEffect(() => {
@@ -27,6 +43,7 @@ function App() {
   }, [adultCount, childrenCount, animalsCount]);
 
   return (
+    <FormProvider {...methods}>
     <div className="App">
       <header>
 
@@ -43,13 +60,6 @@ function App() {
               />
             ) : (
               <Form
-                adultCount={adultCount} setAdultCount={setAdultCount} 
-                childrenCount={childrenCount} setChildrenCount={setChildrenCount} 
-                animalsCount={animalsCount} setAnimalsCount={setAnimalsCount} 
-                inputValueLocation={inputValueLocation} setInputValueLocation={setInputValueLocation} 
-                inputCheckboxChildrenOrAnimals={inputCheckboxChildrenOrAnimals} setInputCheckboxChildrenOrAnimals={setInputCheckboxChildrenOrAnimals} 
-                inputCheckboxTermAndConditions={inputCheckboxTermAndConditions} setInputCheckboxTermAndConditions={setInputCheckboxTermAndConditions} 
-                inputRadioYesOrNoTravelingForWork={inputRadioYesOrNoTravelingForWork} setInputRadioYesOrNoTravelingForWork={setInputRadioYesOrNoTravelingForWork}
                 onBookNowClick={handleBookNowClick}
               />
             )
@@ -57,6 +67,7 @@ function App() {
           </div>
       </header>
     </div>
+    </FormProvider>
   );
 }
 

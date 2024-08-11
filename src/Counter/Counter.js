@@ -5,21 +5,21 @@ import TextField from '@mui/material/TextField';
 export const Counter = ({
     value, 
     maxValue, 
-    onChange, 
+    setValue, 
     tag
   }) => {
 
   const handleIncrement = () => {
-    value === maxValue ? onChange(maxValue) : onChange(value + 1)
+    value === maxValue ? setValue(maxValue) : setValue(value + 1)
   }
 
   const handleDecrement = () => {
-    value === 0 ? onChange(0) : onChange(value - 1)
+    value === 0 ? setValue(0) : setValue(value - 1)
   }
 
   const handleInputChange = (event) => {
     const value = event.target.value.replace(/\+|-/ig, '');
-    value <= maxValue ? onChange(Number(value)) : onChange(maxValue)
+    value <= maxValue ? setValue(Number(value)) : setValue(maxValue)
   }
 
   return (

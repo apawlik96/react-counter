@@ -1,122 +1,121 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Form } from './Form';
 import '@testing-library/jest-dom/extend-expect';
+import { Form } from './Form';
 import { useFormContext } from 'react-hook-form';
 
 jest.mock('react-hook-form', () => ({
   useFormContext: jest.fn(),
 }));
 
-describe('Form', () => {
+describe('Form Component Tests', () => {
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('render the form component with valid inputs', () => {
     const mockOnBookNowClick = jest.fn();
 
-    beforeEach(() => {
-        useFormContext.mockReturnValue({
-          register: jest.fn(),
-          watch: jest.fn((field) => {
-            const values = {
-              inputValueLocation: '',
-              inputCheckboxChildrenOrAnimals: false,
-              inputCheckboxTermAndConditions: false,
-              adultCount: 0,
-              childrenCount: 0,
-              animalsCount: 0,
-            };
-            return values[field];
-          }),
-          setValue: jest.fn(),
-        });
-      });
-  
+    const mockValues = {
+      inputValueLocation: 'Cracow',
+      inputCheckboxChildrenOrAnimals: true,
+      inputCheckboxTermAndConditions: true,
+      inputRadioYesOrNoTravelingForWork: 'yes',
+      adultCount: 2,
+      childrenCount: 1,
+      animalsCount: 1,
+    };
 
-    
-    it('Create paragraph', () => {
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
-        expect(screen.getByText(/Total passengers: 0/i)).toBeInTheDocument();
+    useFormContext.mockReturnValue({
+      register: jest.fn(),
+      watch: jest.fn((field) => mockValues[field]),
+      setValue: jest.fn(),
     });
 
-    
-    it("Create component counter adult", () => {
-        useFormContext.mockReturnValue({
-            register: jest.fn(),
-            watch: jest.fn((field) => {
-                if (field === 'inputCheckboxChildrenOrAnimals') {
-                  return true;
-                }
-              }),
-            setValue: jest.fn(), 
-        });
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
+    render(
+      <Form
+        onBookNowClick={mockOnBookNowClick}
+      />
+    );
 
-        const counterElement = screen.getByText(/adult/i);
-        expect(counterElement).toBeInTheDocument();
-    })
+    const locationInput = screen.getByLabelText(/Where are you going today?/i);
+    fireEvent.change(locationInput, { target: { value: 'Cracow' } });
 
-    it("Create component counter animal/child", () => {
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
+    const checkboxChildrenOrAnimals = screen.getByLabelText(/Are you travelling with children or animals?/i);
+    fireEvent.click(checkboxChildrenOrAnimals);
+    expect(checkboxChildrenOrAnimals.checked).toBe(true);
 
-        const counterChildren = screen.getByLabelText(/children/i);
-        const counterAnimals = screen.getByLabelText(/animals/i);
-    
-        expect(counterChildren).toBeInTheDocument();
-        expect(counterAnimals).toBeInTheDocument()
-    })
+    const adultCounter = screen.getByText(/Number of adult:/i);
+    expect(adultCounter).toHaveTextContent('Number of adult: 2');
+  
+    const childrenCounter = screen.getByText(/Number of children:/i);
+    expect(childrenCounter).toHaveTextContent('Number of children: 1');
+  
+    const animalsCounter = screen.getByText(/Number of animals:/i);
+    expect(animalsCounter).toHaveTextContent('Number of animals: 1');
 
-    it("Create input location", () => {
-        const mockSetValue = jest.fn();
-        useFormContext.mockReturnValue({
-            register: jest.fn(),
-            watch: jest.fn(),
-            setValue: mockSetValue,
-        });
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
+    const radioWorkYes = screen.getByLabelText(/Yes/i);
+    fireEvent.click(radioWorkYes);
+    expect(radioWorkYes.checked).toBe(true);
 
-        const locationInput = screen.getByLabelText(/where are you going today?/i);
-        fireEvent.change(locationInput, { target: { value: 'Cracow' } });
+    const checkboxTerms = screen.getByLabelText(/Do you accept terms and conditions?/i);
+    fireEvent.click(checkboxTerms);
+    expect(checkboxTerms.checked).toBe(true);
 
-        expect(locationInput).toBeInTheDocument();
-        expect(locationInput.value).toBe('Cracow');
-        expect(mockSetValue).toHaveBeenCalled();
-    })
+    const bookNowButton = screen.getByRole('button', { name: /Book now/i });
+    expect(bookNowButton).toBeEnabled();
 
-    it("Create input traveling for work", () => {
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
+    fireEvent.click(bookNowButton);
 
-        const labelElement = screen.getByText(/are you traveling for work/i);
-        expect(labelElement).toBeInTheDocument();
-    
-        const yesRadio = screen.getByLabelText(/yes/i);
-        const noRadio = screen.getByLabelText(/no/i);
-    
-        expect(yesRadio).toBeInTheDocument();
-        expect(noRadio).toBeInTheDocument();
-    })
+    expect(mockOnBookNowClick).toHaveBeenCalled();
+  });
 
-    it("Create input terms abd conditions", () => {
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
-        const termsAndConditionsInput = screen.getByLabelText(/Do you accept terms and conditions?/i);
-        expect(termsAndConditionsInput).toBeInTheDocument();
-    })
+  test('disable the "Book Now" button when form values are empty', () => {
+    const mockOnBookNowClick = jest.fn();
 
-    it("Create button book now", () => {
-        useFormContext.mockReturnValue({
-            register: jest.fn(),
-            watch: jest.fn((field) => {
-                if (field === 'inputCheckboxTermAndConditions') {
-                    return true;
-                }
-                return false;
-            }),
-            setValue: jest.fn(),
-        });
-        render(<Form onBookNowClick={mockOnBookNowClick} />);
+    const mockValues = {
+      inputValueLocation: '',
+      inputCheckboxChildrenOrAnimals: false,
+      inputCheckboxTermAndConditions: false,
+      inputRadioYesOrNoTravelingForWork: 'no',
+      adultCount: 0,
+      childrenCount: 0,
+      animalsCount: 0,
+    };
 
-        const bookNowButton = screen.getByRole('button', { name: /book now/i });
-        fireEvent.click(bookNowButton);
+    useFormContext.mockReturnValue({
+      register: jest.fn(),
+      watch: jest.fn((field) => mockValues[field]),
+      setValue: jest.fn(),
+    });
 
-        expect(bookNowButton).not.toBeDisabled();
-        expect(bookNowButton).toBeInTheDocument();
-        expect(mockOnBookNowClick).toHaveBeenCalled();
-    })
+    render(
+      <Form
+        onBookNowClick={mockOnBookNowClick}
+      />
+    );
+
+    const locationInput = screen.getByLabelText(/Where are you going today?/i);
+    fireEvent.change(locationInput, { target: { value: '' } });
+  
+    const checkboxChildrenOrAnimals = screen.getByLabelText(/Are you travelling with children or animals?/i);
+    expect(checkboxChildrenOrAnimals.checked).toBe(false);
+  
+    const adultCounter = screen.getByText(/Number of adult:/i);
+    expect(adultCounter).toHaveTextContent('Number of adult: 0');
+
+    expect(screen.queryByText(/Number of children:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Number of animals:/i)).not.toBeInTheDocument();
+
+    const radioWorkNo = screen.getByLabelText(/No/i);
+    fireEvent.click(radioWorkNo);
+    expect(radioWorkNo.checked).toBe(true);
+  
+    const checkboxTerms = screen.getByLabelText(/Do you accept terms and conditions?/i);
+    expect(checkboxTerms.checked).toBe(false);
+  
+    const bookNowButton = screen.getByRole('button', { name: /Book now/i });
+    expect(bookNowButton).toBeDisabled();
+    expect(mockOnBookNowClick).not.toHaveBeenCalled();
+  });
 });
